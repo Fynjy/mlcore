@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Source Files\regression">
+      <UniqueIdentifier>{5685e9a8-6566-47ed-ae4c-cadc1b5f6dea}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\regression">
+      <UniqueIdentifier>{c7e80bbf-28df-45d6-be0f-0e4e26c85b32}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\data">
+      <UniqueIdentifier>{e366ced0-3369-487e-bd36-f5a9da08033f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\data">
+      <UniqueIdentifier>{7dea77dc-73ca-4263-a94d-4256721b5e32}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="mlcore\regression\RegressionTree.h">
+      <Filter>Header Files\regression</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\GroupDataHistogram.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\Features.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="mlcore\data\Features.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
