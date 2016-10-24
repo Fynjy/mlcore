@@ -21,21 +21,51 @@
     <Filter Include="Source Files\data">
       <UniqueIdentifier>{7dea77dc-73ca-4263-a94d-4256721b5e32}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\control">
+      <UniqueIdentifier>{6e7abf83-a77e-475e-9cd0-ae9c7b0a6af3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\control">
+      <UniqueIdentifier>{e111d2c9-cb90-4adc-af30-7925993df224}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\tree">
+      <UniqueIdentifier>{60885f62-c200-4822-94a0-d2292a9b6689}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\tree">
+      <UniqueIdentifier>{6c3f196e-4891-42f2-8acb-5cf96013d783}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="mlcore\regression\RegressionTree.h">
-      <Filter>Header Files\regression</Filter>
-    </ClInclude>
-    <ClInclude Include="mlcore\data\GroupDataHistogram.h">
-      <Filter>Header Files\data</Filter>
-    </ClInclude>
     <ClInclude Include="mlcore\data\Features.h">
       <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\VectorDataHistogram.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\control\TreeControl.h">
+      <Filter>Header Files\control</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\tree\Filter.h">
+      <Filter>Header Files\tree</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\tree\Node.h">
+      <Filter>Header Files\tree</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\tree\Tree.h">
+      <Filter>Header Files\tree</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mlcore\data\Features.cpp">
       <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\VectorDataHistogram.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\control\TreeControl.cpp">
+      <Filter>Source Files\control</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\tree\Filter.cpp">
+      <Filter>Source Files\tree</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

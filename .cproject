@@ -45,7 +45,6 @@
 						<entry excluding="ranking|regression|mlcore" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 						<entry excluding="data" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="mlcore"/>
 						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="mlcore/data"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ranking"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -95,10 +94,8 @@
 						</toolChain>
 					</folderInfo>
 					<sourceEntries>
-						<entry excluding="ranking|regression|mlcore" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
-						<entry excluding="data" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="mlcore"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="mlcore/data"/>
-						<entry flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name="ranking"/>
+						<entry excluding="mlcore" flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name=""/>
+						<entry flags="VALUE_WORKSPACE_PATH" kind="sourcePath" name="mlcore"/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -124,5 +121,12 @@
 		</scannerConfigBuildInfo>
 	</storageModule>
 	<storageModule moduleId="org.eclipse.cdt.core.LanguageSettingsProviders"/>
-	<storageModule moduleId="refreshScope"/>
+	<storageModule moduleId="refreshScope" versionNumber="2">
+		<configuration configurationName="Debug">
+			<resource resourceType="PROJECT" workspacePath="/mlcore"/>
+		</configuration>
+		<configuration configurationName="Release">
+			<resource resourceType="PROJECT" workspacePath="/mlcore"/>
+		</configuration>
+	</storageModule>
 </cproject>
