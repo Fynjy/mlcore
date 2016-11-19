@@ -81,6 +81,7 @@ namespace mlcore
     Domains(const FeatureDomain::Allocator& alloc, std::size_t count);
     Domains(const FeatureDomain::Allocator& alloc, const Features& features);
     void trace_mapping(std::ostream& os) const;
+    Features features() const;
   };
 
   typedef std::shared_ptr<Domains> DomainsPtr;

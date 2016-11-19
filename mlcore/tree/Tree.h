@@ -56,7 +56,7 @@ namespace mlcore
       trees_(std::move(trees))
     {}
 
-    const T& value(const std::vector<double>& x) const
+    const T value(const std::vector<double>& x) const
     {
       auto it = trees_.begin();
       T res = it->value(x);
@@ -64,7 +64,7 @@ namespace mlcore
 
       while (it != trees_.end())
       {
-        ValueHelper::add(res, it->value(x));
+        ValueHelper<T>::add(res, it->value(x));
         ++it;
       }
 
@@ -73,7 +73,7 @@ namespace mlcore
 
     void save(std::ostream& os) const
     {
-      os << tree_.size() << ' ';
+      os << trees_.size() << '\n';
 
       for (const auto& tree : trees_)
       {

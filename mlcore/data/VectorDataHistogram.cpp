@@ -1,6 +1,7 @@
 #include <sstream>
 #include <stdexcept>
 
+#include <cppcore/memory/MemoryPool.h>
 #include "cppcore/memory/MemoryPoolAllocator.h"
 #include "cppcore/io/Serialization.h"
 
@@ -37,6 +38,14 @@ namespace mlcore
     return d_[point_num];
   }
 
+  void VectorDataPoint::d(std::vector<double>& vals) const
+  {
+    for (std::size_t i = 0; i < vals.size(); ++i)
+    {
+      vals[i] = d_[i];
+    }
+  }
+
   /*
    * VectorDataHistogram
    */
@@ -50,6 +59,14 @@ namespace mlcore
     points_count_(points_count),
     memory_pool_(1024 * 64),
     domains_(std::make_shared<Domains>(cppcore::MemoryPoolAllocatorType(memory_pool_), features))
+  {}
+
+  VectorDataHistogram::VectorDataHistogram(VectorDataHistogram&& arg)
+  :
+    points_count_(arg.points_count_),
+    memory_pool_(std::move(arg.memory_pool_)),
+    points_(std::move(arg.points_)),
+    domains_(std::make_shared<Domains>(cppcore::MemoryPoolAllocatorType(memory_pool_), arg.domains_->features()))
   {}
 
   void VectorDataHistogram::compile()
@@ -71,7 +88,7 @@ namespace mlcore
 
     for (std::size_t j = 0; j < points_.size(); ++j)
     {
-      VectorDataPoint& point = points_.back();
+      VectorDataPoint& point = points_[j];
 
       for (std::size_t i = 0; i < features_count(); ++i)
       {
@@ -84,6 +101,15 @@ namespace mlcore
 
   void VectorDataHistogram::move(VectorDataHistogram& data_histogram, std::size_t b, std::size_t e)
   {
+    data_histogram.points_.insert(
+      data_histogram.points_.end(),
+      points_.begin() + b,
+      points_.begin() + e);
+    points_.erase(points_.begin() + b, points_.begin() + e);
+
+    data_histogram.points_count_ = points_count_;
+    data_histogram.domains_ = domains_;
+    data_histogram.is_compiled_ = is_compiled_;
   }
 
   void VectorDataHistogram::save(std::ostream& os) const
@@ -134,6 +160,83 @@ namespace mlcore
       is.read(reinterpret_cast<char*>(points_.back().x_), features_count() * sizeof(std::size_t));
       is.read(reinterpret_cast<char*>(points_.back().d_), points_count() * sizeof(double));
     }
+
+    is_compiled_ = true;
+  }
+
+  void VectorDataHistogram::save_as_text(std::ostream& os) const
+  {
+    os << features_count() << " # features_count\n";
+
+    for (const auto& domain : *domains_)
+    {
+      os << domain.get_feature().name << ' ' << static_cast<int>(domain.get_feature().type) << '\n';
+    }
+
+    os << points_count() << " # points count\n";
+    os << size() << " # size\n";
+
+    for (std::size_t i = 0; i < points_.size(); ++i)
+    {
+      const auto& point = points_[i];
+
+      for (std::size_t inx = 0; inx < features_count(); ++inx)
+      {
+        os << mark_to_val(inx, point.x(inx)) << ' ';
+      }
+
+      os << "| ";
+
+      for (std::size_t inx = 0; inx < points_count(); ++inx)
+      {
+        os << point.d(inx) << ' ';
+      }
+
+      os << '\n';
+    }
+  }
+
+  void VectorDataHistogram::load_from_text(std::istream& is)
+  {
+    std::size_t sz = 0;
+    std::string tmp;
+    is >> sz;
+    std::getline(is, tmp);
+    Features features;
+
+    for (std::size_t i = 0; i < sz; ++i)
+    {
+      std::string name;
+      int type = 0;
+      is >> name >> type;
+      features.emplace_back(FeatureType(type), name);
+    }
+
+    domains_ = std::make_shared<Domains>(cppcore::MemoryPoolAllocatorType(memory_pool_), features);
+    is >> points_count_;
+    std::getline(is, tmp);
+    is >> sz;
+    std::getline(is, tmp);
+    std::vector<double> x(features_count(), 0);
+
+    for (std::size_t i = 0; i < sz; ++i)
+    {
+      for (std::size_t inx = 0; inx < features_count(); ++inx)
+      {
+        is >> x[inx];
+      }
+
+      char ch;
+      is >> ch;
+      auto& point = add(x);
+
+      for (std::size_t inx = 0; inx < points_count(); ++inx)
+      {
+        is >> point.d(inx);
+      }
+    }
+
+    compile();
   }
 
   std::size_t VectorDataHistogram::size() const
@@ -169,6 +272,16 @@ namespace mlcore
   VectorDataPoint& VectorDataHistogram::operator[] (std::size_t i)
   {
     return points_[i];
+  }
+
+  void VectorDataHistogram::x(std::size_t inx, std::vector<double>& vals) const
+  {
+    const auto& point = points_[inx];
+
+    for (std::size_t i = 0; i < vals.size(); ++i)
+    {
+      vals[i] = mark_to_val(i, point.x(i));
+    }
   }
 
   double VectorDataHistogram::mark_to_val(std::size_t feature_num, std::size_t mark) const

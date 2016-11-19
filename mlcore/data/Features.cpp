@@ -144,6 +144,18 @@ namespace mlcore
     }
   }
 
+  Features Domains::features() const
+  {
+    Features f;
+
+    for (const auto& domain : *this)
+    {
+      f.emplace_back(domain.get_feature());
+    }
+
+    return f;
+  }
+
   void Domains::trace_mapping(std::ostream& os) const
   {
     for (std::size_t n = 0; n < size(); ++n)

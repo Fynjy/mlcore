@@ -7,36 +7,54 @@
 #include "cppcore/thread/Executor.h"
 
 #include "mlcore/data/VectorDataHistogram.h"
+#include "mlcore/statistic/DescriptiveStatistics.h"
 #include "mlcore/tree/Tree.h"
 
 namespace mlcore
 {
   double find_max(const std::vector<double>& vals, std::size_t& opt_inx);
   double find_max(const VectorDataPoint& vals, std::size_t points_count);
+  double t_test(const DescriptiveStatistics& val1, const DescriptiveStatistics& val2);
 
   class PointState
   {
   public:
-    PointState(double max_orig, std::size_t point_count)
+    PointState(const VectorDataPoint& point, std::size_t points_count)
     :
-      vals_(new double[point_count]),
-      max_orig_(max_orig)
+      r_(new double[points_count]),
+      d_(new double[points_count]),
+      max_orig_(find_max(point, points_count))
     {
-      std::memset(vals_.get(), 0, point_count * sizeof(double));
+      for (std::size_t i = 0; i < points_count; ++i)
+      {
+        r_[i] = point.d(i);
+      }
+
+      std::memset(d_.get(), 0, points_count * sizeof(double));
     }
 
     PointState(PointState&& arg) = default;
     PointState(const PointState&) = delete;
     PointState& operator= (const PointState&) = delete;
 
-    double operator[] (std::size_t inx) const
+    double d(std::size_t inx) const
     {
-      return vals_[inx];
+      return d_[inx];
     }
 
-    double& operator[] (std::size_t inx)
+    double& d(std::size_t inx)
     {
-      return vals_[inx];
+      return d_[inx];
+    }
+
+    double r(std::size_t inx) const
+    {
+      return r_[inx];
+    }
+
+    double& r(std::size_t inx)
+    {
+      return r_[inx];
     }
 
     double max_orig() const
@@ -45,7 +63,8 @@ namespace mlcore
     }
 
   private:
-    std::unique_ptr<double[]> vals_;
+    std::unique_ptr<double[]> d_;
+    std::unique_ptr<double[]> r_;
     double max_orig_;
   };
 
@@ -54,13 +73,28 @@ namespace mlcore
   class VectorTreeLearner
   {
   public:
-    VectorTreeLearner(VectorDataHistogram& examples);
-    VectorForest learn();
+    class LearnIterationCallback
+    {
+    public:
+      virtual ~LearnIterationCallback()
+      {}
+
+      virtual void call(
+        const std::vector<VectorTree>& trees,
+        std::size_t iter_num,
+        const std::vector<double>& variable_importance) = 0;
+    };
+
+  public:
+    VectorTreeLearner(const VectorDataHistogram& examples);
+    VectorForest learn(LearnIterationCallback* callback = nullptr);
+    const std::vector<double>& variable_importance() const;
 
   private:
-    VectorDataHistogram& examples_;
+    const VectorDataHistogram& examples_;
     PointStates point_states_;
     cppcore::Executor executor_;
+    std::vector<double> variable_importance_;
 
   private:
     struct Context
@@ -113,37 +147,39 @@ namespace mlcore
       Split& split,
       const std::deque<std::size_t>& region_indexes) const;
 
-    double error(
+    DescriptiveStatistics error(
       const std::deque<std::size_t>& region_indexes,
       const std::vector<double>& mean) const;
 
     static double error(
       const VectorDataPoint& points,
       const PointState& point_state,
-      const std::vector<double>& mean,
-      std::vector<double>& tmp);
+      const std::vector<double>& mean);
 
     template<typename Comparator>
     void make_split(
       const std::deque<std::size_t>& region_indexes,
       Split& split,
-      std::size_t split_point,
       Comparator cmp) const
     {
-      std::vector<double> tmp(examples_.points_count());
+      DescriptiveStatistics err1;
+      DescriptiveStatistics err2;
 
       for (std::size_t inx : region_indexes)
       {
-        if (cmp(examples_[inx].x(split.feature_num), split_point))
+        if (cmp(examples_[inx].x(split.feature_num), split.split_point))
         {
-          split.err1 += error(examples_[inx], point_states_[inx], split.m1, tmp);
+          err1 += error(examples_[inx], point_states_[inx], split.m1);
         }
         else
         {
-          split.err2 += error(examples_[inx], point_states_[inx], split.m2, tmp);
+          err2 += error(examples_[inx], point_states_[inx], split.m2);
         }
       }
 
+      split.has_split = (t_test(err1, err2) > 1.645);
+      split.err1 = err1.sum();
+      split.err2 = err2.sum();
       split.err = split.err1 + split.err2;
     }
   };

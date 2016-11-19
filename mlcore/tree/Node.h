@@ -17,28 +17,12 @@ namespace mlcore
     virtual const T& value(const std::vector<double>& x) const = 0;
     virtual void save(std::ostream& os) const = 0;
     virtual void load(std::istream& is) = 0;
-
-    std::unique_ptr<Node> load_node(std::istream& is);
+    static std::unique_ptr<Node> load_node(std::istream& is);
   };
 
   template<typename T>
   class ValueHelper
   {
-  public:
-    static void save(std::ostream& os, const T& val)
-    {
-      static_assert(false);
-    }
-
-    static void load(std::istream& is, T& val)
-    {
-      static_assert(false);
-    }
-
-    static T& add(T& arg1, const T& arg2)
-    {
-      static_assert(false);
-    }
   };
 
   template<typename T>
@@ -125,6 +109,26 @@ namespace mlcore
     std::unique_ptr<Node> right;
   };
 
+  template<typename T>
+  std::unique_ptr<Node<T>> Node<T>::load_node(std::istream& is)
+  {
+    std::unique_ptr<Node<T>> node;
+    char type;
+    is >> type;
+
+    if (type == TerminalNode<T>::TYPE)
+    {
+      node.reset(new TerminalNode<T>());
+    }
+    else
+    {
+      node.reset(new NonTerminalNode<T>());
+    }
+
+    node->load(is);
+    return node;
+  }
+
   template<>
   class ValueHelper<double>
   {
@@ -137,6 +141,11 @@ namespace mlcore
     static void load(std::istream& is, double& val)
     {
       is >> val;
+    }
+
+    static void add(double& res, double val)
+    {
+      res += val;
     }
   };
 
@@ -166,6 +175,14 @@ namespace mlcore
       for (std::size_t i = 0; i < sz; ++i)
       {
         is >> val[i];
+      }
+    }
+
+    static void add(std::vector<double>& res, const std::vector<double>& val)
+    {
+      for (std::size_t i = 0; i < res.size(); ++i)
+      {
+        res[i] += val[i];
       }
     }
   };

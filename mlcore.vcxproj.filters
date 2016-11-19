@@ -33,6 +33,12 @@
     <Filter Include="Source Files\tree">
       <UniqueIdentifier>{6c3f196e-4891-42f2-8acb-5cf96013d783}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\statistic">
+      <UniqueIdentifier>{6e1b616e-afae-4bf7-a9d4-2af026c37a57}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\statistic">
+      <UniqueIdentifier>{86c5d5c8-dc25-42ef-baea-91b8fe13642d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mlcore\data\Features.h">
@@ -52,6 +58,9 @@
     </ClInclude>
     <ClInclude Include="mlcore\tree\Tree.h">
       <Filter>Header Files\tree</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\statistic\DescriptiveStatistics.h">
+      <Filter>Header Files\statistic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

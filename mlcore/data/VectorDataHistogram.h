@@ -6,9 +6,12 @@
 #include <istream>
 #include <ostream>
 
-#include <cppcore/memory/MemoryPool.h>
-
 #include "Features.h"
+
+namespace cppcore
+{
+  class MemoryPool;
+}
 
 namespace mlcore
 {
@@ -24,6 +27,7 @@ namespace mlcore
     std::size_t& x(std::size_t feature_num);
     double d(std::size_t point_num) const;
     double& d(std::size_t point_num);
+    void d(std::vector<double>& vals) const;
 
   private:
     std::size_t* x_ = nullptr;
@@ -35,10 +39,14 @@ namespace mlcore
   public:
     VectorDataHistogram();
     VectorDataHistogram(const Features& features, std::size_t points_count);
+    VectorDataHistogram(VectorDataHistogram&& arg);
     void compile();
     void move(VectorDataHistogram& data_histogram, std::size_t b, std::size_t e);
     void save(std::ostream& os) const;
     void load(std::istream& is);
+
+    void save_as_text(std::ostream& os) const;
+    void load_from_text(std::istream& is);
 
     std::size_t size() const;
     std::size_t features_count() const;
@@ -48,6 +56,7 @@ namespace mlcore
 
     const VectorDataPoint& operator[] (std::size_t i) const;
     VectorDataPoint& operator[] (std::size_t i);
+    void x(std::size_t inx, std::vector<double>& vals) const;
     double mark_to_val(std::size_t feature_num, std::size_t mark) const;
     std::size_t val_to_mark(std::size_t feature_num, double val);
 

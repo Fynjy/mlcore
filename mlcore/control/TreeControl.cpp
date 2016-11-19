@@ -1,3 +1,4 @@
+#include <iostream>
 #include <limits>
 #include <stdexcept>
 
@@ -37,6 +38,20 @@ namespace mlcore
     return max_val;
   }
 
+  double t_test(const DescriptiveStatistics& val1, const DescriptiveStatistics& val2)
+  {
+    // p, %  99.99   99.90   99.00   97.72   97.50   95.00   90.00   84.13   50.00
+    // q     3.715   3.090   2.326   2.000   1.960   1.645   1.282   1.000   0.000
+    const double factor = val1.variance() / val1.count() + val2.variance() / val2.count();
+
+    if (std::fabs(factor) < 1e-6)
+    {
+      return std::numeric_limits<double>::max();
+    }
+
+    return std::fabs(val1.mean() - val2.mean()) / std::sqrt(factor);
+  }
+
   /*
    * VectorMean
    */
@@ -48,11 +63,11 @@ namespace mlcore
       vals_(points_count, 0)
     {}
 
-    void add(const VectorDataPoint& point)
+    void add(const PointState& point)
     {
       for (std::size_t i = 0; i < vals_.size(); ++i)
       {
-        vals_[i] += point.d(i);
+        vals_[i] += point.r(i);
       }
 
       ++n_;
@@ -108,7 +123,7 @@ namespace mlcore
   /*
    * VectorTreeLearner
    */
-  VectorTreeLearner::VectorTreeLearner(VectorDataHistogram& examples)
+  VectorTreeLearner::VectorTreeLearner(const VectorDataHistogram& examples)
   :
     examples_(examples),
     executor_(std::thread::hardware_concurrency() - 1)
@@ -119,18 +134,21 @@ namespace mlcore
     }
   }
 
-  VectorForest VectorTreeLearner::learn()
+  VectorForest VectorTreeLearner::learn(LearnIterationCallback* callback)
   {
     std::vector<VectorTree> trees;
     bool flag = true;
     point_states_.clear();
     point_states_.reserve(examples_.size());
     const std::size_t points_count = examples_.points_count();
+    variable_importance_.resize(examples_.features_count());
 
     for (std::size_t i = 0; i < examples_.size(); ++i)
     {
-      point_states_.emplace_back(find_max(examples_[i], points_count), points_count);
+      point_states_.emplace_back(examples_[i], points_count);
     }
+
+    std::size_t iter_num = 0;
 
     while (flag)
     {
@@ -139,28 +157,35 @@ namespace mlcore
       if (flag = learn_iteration(tree))
       {
         trees.emplace_back(std::move(tree));
+
+        if (callback)
+        {
+          callback->call(trees, iter_num++, variable_importance_);
+        }
       }
     }
 
     return VectorForest(std::move(trees));
   }
 
+  const std::vector<double>& VectorTreeLearner::variable_importance() const
+  {
+    return variable_importance_;
+  }
+
   bool VectorTreeLearner::learn_iteration(VectorTree& tree)
   {
     Context ctx;
-    VectorMean m(examples_.points_count());
+    ctx.m.resize(examples_.points_count(), 0);
 
     for (std::size_t i = 0; i < examples_.size(); ++i)
     {
       ctx.region_indexes.push_back(i);
-      m.add(examples_[i]);
     }
 
-    m.get(ctx.m);
-    ctx.err = error(ctx.region_indexes, ctx.m);
-    cppcore::Executor executor(std::thread::hardware_concurrency() - 1);
+    ctx.err = error(ctx.region_indexes, ctx.m).sum();
     VectorNodePtr root = make_node(ctx);
-    executor.wait_for_empty();
+    executor_.wait_for_empty();
 
     if (root)
     {
@@ -198,6 +223,7 @@ namespace mlcore
 
     if (split.has_split)
     {
+      variable_importance_[split.feature_num] += (ctx.err - split.err);
       auto node = std::make_unique<NonTerminalNode<std::vector<double>>>();
       node->filter.feature_num = split.feature_num;
       node->filter.split_point = examples_.mark_to_val(split.feature_num, split.split_point);
@@ -232,6 +258,11 @@ namespace mlcore
       return VectorNodePtr(node.release());
     }
 
+    if (ctx.region_indexes.size() == examples_.size())
+    {
+      return nullptr;
+    }
+
     return make_terminal_node(ctx.m, ctx.region_indexes);
   }
 
@@ -239,12 +270,12 @@ namespace mlcore
   {
     for (std::size_t i : region_indexes)
     {
-      VectorDataPoint& point = examples_[i];
+      const VectorDataPoint& point = examples_[i];
 
       for (std::size_t inx = 0; inx < d.size(); ++inx)
       {
-        point_states_[i][inx] += d[inx];
-        point.d(inx) -= d[inx];
+        point_states_[i].d(inx) += d[inx];
+        point_states_[i].r(inx) -= d[inx];
       }
     }
 
@@ -256,6 +287,7 @@ namespace mlcore
     Split& split,
     const std::deque<std::size_t>& region_indexes) const
   {
+    std::cout << "best_split: " << examples_.domains()->at(feature_num).get_feature().name << std::endl;
     const auto& domain = examples_.domains()->at(feature_num);
 
     if (domain.size() <= 1)
@@ -268,17 +300,17 @@ namespace mlcore
     for (auto inx : region_indexes)
     {
       const auto& e = examples_[inx];
-      vals[e.x(feature_num)].add(e);
+      vals[e.x(feature_num)].add(point_states_[inx]);
     }
 
-    VectorMean val_all(domain.size());
+    VectorMean val_all(examples_.points_count());
 
     for (std::size_t i = 0; i < vals.size(); ++i)
     {
       val_all.add(vals[i]);
     }
 
-    VectorMean val1(domain.size());
+    VectorMean val1(examples_.points_count());
     VectorMean val2 = val_all;
 
     for (std::size_t split_point = 0; split_point < vals.size(); ++split_point)
@@ -304,67 +336,57 @@ namespace mlcore
       s.m1 = val1.get();
       s.m2 = val2.get();
       s.feature_num = feature_num;
+      s.split_point = split_point;
 
       if (domain.get_feature().type == mlcore::FeatureType::NotOrdered)
       {
-        make_split(region_indexes, s, split_point, compare_unordered);
+        make_split(region_indexes, s, compare_unordered);
       }
       else
       {
-        make_split(region_indexes, s, split_point, compare_ordered);
+        make_split(region_indexes, s, compare_ordered);
       }
 
-      //double criteria_value = 0;
-      //const bool pass_test = t_test(val1, val2, criteria_value);
-
-      //if (criteria_value > split.criteria_value &&
-      //    pass_test)
+      if (s.has_split && s.err < split.err)
       {
-        //split.criteria_value = criteria_value;
-
-        if (s.err < split.err)
-        {
-          split.err = s.err;
-          split.feature_num = feature_num;
-          split.split_point = split_point;
-          split.has_split = true;
-          split.m1 = s.m1;
-          split.m2 = s.m2;
-          split.err1 = s.err1;
-          split.err2 = s.err2;
-        }
+        split = s;
       }
     }
   }
 
-  double VectorTreeLearner::error(
+  DescriptiveStatistics VectorTreeLearner::error(
     const std::deque<std::size_t>& region_indexes,
     const std::vector<double>& mean) const
   {
-    std::vector<double> tmp(examples_.points_count());
-    double err = 0;
+    DescriptiveStatistics err;
 
     for (std::size_t inx : region_indexes)
     {
-      err += error(examples_[inx], point_states_[inx], mean, tmp);
+      err += error(examples_[inx], point_states_[inx], mean);
     }
 
     return err;
   }
 
   double VectorTreeLearner::error(
-    const VectorDataPoint& points,
+    const VectorDataPoint& point,
     const PointState& point_state,
-    const std::vector<double>& mean,
-    std::vector<double>& tmp)
+    const std::vector<double>& mean)
   {
-    for (std::size_t j = 0; j < tmp.size(); ++j)
+    double max_val = std::numeric_limits<double>::lowest();
+    std::size_t opt_inx = 0;
+
+    for (std::size_t i = 0; i < mean.size(); ++i)
     {
-      tmp[j] = point_state[j] + mean[j];
+      const double tmp = point_state.d(i) + mean[i];
+
+      if (max_val < tmp)
+      {
+        max_val = tmp;
+        opt_inx = i;
+      }
     }
 
-    std::size_t opt_inx = 0;
-    const double r = find_max(tmp, opt_inx);
-    return (point_state.max_orig() - r);
+    return (point_state.max_orig() - point.d(opt_inx));
   }
 }
