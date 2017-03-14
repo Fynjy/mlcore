@@ -39,6 +39,12 @@
     <Filter Include="Source Files\statistic">
       <UniqueIdentifier>{86c5d5c8-dc25-42ef-baea-91b8fe13642d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\classification">
+      <UniqueIdentifier>{a0992dc0-45ab-4514-86c7-86417e022ff5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\classification">
+      <UniqueIdentifier>{85b60f78-1b3a-48b4-b613-9f3bca18fdd2}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mlcore\data\Features.h">
@@ -62,6 +68,9 @@
     <ClInclude Include="mlcore\statistic\DescriptiveStatistics.h">
       <Filter>Header Files\statistic</Filter>
     </ClInclude>
+    <ClInclude Include="mlcore\classification\MultiClassLogisticClassification.h">
+      <Filter>Header Files\classification</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mlcore\data\Features.cpp">
@@ -75,6 +84,9 @@
     </ClCompile>
     <ClCompile Include="mlcore\tree\Filter.cpp">
       <Filter>Source Files\tree</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\classification\MultiClassLogisticClassification.cpp">
+      <Filter>Source Files\classification</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

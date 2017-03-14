@@ -127,6 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="mlcore\classification\MultiClassLogisticClassification.h" />
     <ClInclude Include="mlcore\control\TreeControl.h" />
     <ClInclude Include="mlcore\data\Features.h" />
     <ClInclude Include="mlcore\data\VectorDataHistogram.h" />
@@ -136,6 +137,7 @@
     <ClInclude Include="mlcore\tree\Tree.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="mlcore\classification\MultiClassLogisticClassification.cpp" />
     <ClCompile Include="mlcore\control\TreeControl.cpp" />
     <ClCompile Include="mlcore\data\Features.cpp" />
     <ClCompile Include="mlcore\data\VectorDataHistogram.cpp" />

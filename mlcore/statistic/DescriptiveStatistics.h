@@ -28,6 +28,11 @@ namespace mlcore
 
     double variance() const
     {
+      if (n_ < 2)
+      {
+        return 0;
+      }
+
       const double m = mean();
       const double v2 = (s2_ - m * m * n_) / (n_ - 1);
       return (v2 > 0 ? v2 : 0);

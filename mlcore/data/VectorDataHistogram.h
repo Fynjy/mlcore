@@ -61,6 +61,7 @@ namespace mlcore
     std::size_t val_to_mark(std::size_t feature_num, double val);
 
     VectorDataPoint& add(const std::vector<double>& x);
+    VectorDataPoint& addFrom(const VectorDataHistogram& examples, std::size_t i);
 
     void trace_memory_stats(std::ostream& os);
 

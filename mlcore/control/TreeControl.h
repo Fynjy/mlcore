@@ -86,12 +86,13 @@ namespace mlcore
     };
 
   public:
-    VectorTreeLearner(const VectorDataHistogram& examples);
-    VectorForest learn(LearnIterationCallback* callback = nullptr);
+    VectorTreeLearner(const VectorDataHistogram& examples, LearnIterationCallback* callback = nullptr);
+    VectorForest learn();
     const std::vector<double>& variable_importance() const;
 
   private:
     const VectorDataHistogram& examples_;
+    LearnIterationCallback* callback_;
     PointStates point_states_;
     cppcore::Executor executor_;
     std::vector<double> variable_importance_;
@@ -177,7 +178,7 @@ namespace mlcore
         }
       }
 
-      split.has_split = (t_test(err1, err2) > 1.645);
+      split.has_split = (t_test(err1, err2) > 2);
       split.err1 = err1.sum();
       split.err2 = err2.sum();
       split.err = split.err1 + split.err2;

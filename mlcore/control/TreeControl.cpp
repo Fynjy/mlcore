@@ -1,5 +1,6 @@
 #include <iostream>
 #include <limits>
+#include <sstream>
 #include <stdexcept>
 
 #include "TreeControl.h"
@@ -38,6 +39,11 @@ namespace mlcore
     return max_val;
   }
 
+  namespace
+  {
+    std::string t_test_debug;
+  }
+
   double t_test(const DescriptiveStatistics& val1, const DescriptiveStatistics& val2)
   {
     // p, %  99.99   99.90   99.00   97.72   97.50   95.00   90.00   84.13   50.00
@@ -49,6 +55,13 @@ namespace mlcore
       return std::numeric_limits<double>::max();
     }
 
+    std::stringstream oss;
+    oss << "val1.mean() = " << val1.mean() << " val2.mean() = " << val2.mean()
+      << " val1.variance() = " << val1.variance() << " val2.variance() = " << val2.variance()
+      << " val1.count() = " << val1.count() << " val2.count() = " << val2.count()
+      << " test = " << std::fabs(val1.mean() - val2.mean()) / std::sqrt(factor);
+
+    t_test_debug = oss.str();
     return std::fabs(val1.mean() - val2.mean()) / std::sqrt(factor);
   }
 
@@ -123,10 +136,12 @@ namespace mlcore
   /*
    * VectorTreeLearner
    */
-  VectorTreeLearner::VectorTreeLearner(const VectorDataHistogram& examples)
+  VectorTreeLearner::VectorTreeLearner(const VectorDataHistogram& examples, LearnIterationCallback* callback)
   :
     examples_(examples),
-    executor_(std::thread::hardware_concurrency() - 1)
+    callback_(callback),
+    //executor_(std::thread::hardware_concurrency() - 1)
+    executor_(1)
   {
     if (!examples.is_compiled())
     {
@@ -134,7 +149,7 @@ namespace mlcore
     }
   }
 
-  VectorForest VectorTreeLearner::learn(LearnIterationCallback* callback)
+  VectorForest VectorTreeLearner::learn()
   {
     std::vector<VectorTree> trees;
     bool flag = true;
@@ -158,9 +173,9 @@ namespace mlcore
       {
         trees.emplace_back(std::move(tree));
 
-        if (callback)
+        if (callback_)
         {
-          callback->call(trees, iter_num++, variable_importance_);
+          callback_->call(trees, iter_num++, variable_importance_);
         }
       }
     }
@@ -253,6 +268,35 @@ namespace mlcore
         }
       }
 
+      {
+        std::cout << "BEST_SPLIT: " << examples_.domains()->at(split.feature_num).get_feature().name
+          << " = " << examples_.mark_to_val(split.feature_num, split.split_point) << std::endl;
+
+        if (left_task->ctx.region_indexes.size() < 100)
+        {
+          std::cout << "left_task->ctx.region_indexes = [";
+
+          for (auto inx : left_task->ctx.region_indexes)
+          {
+            std::cout << inx << ',';
+          }
+
+          std::cout << "]\n";
+        }
+
+        if (right_task->ctx.region_indexes.size() < 100)
+        {
+          std::cout << "right_task->ctx.region_indexes = [";
+
+          for (auto inx : right_task->ctx.region_indexes)
+          {
+            std::cout << inx << ',';
+          }
+
+          std::cout << "]\n";
+        }
+      }
+
       executor_.submit(std::bind(&MakeNodeTask::execute, left_task));
       executor_.submit(std::bind(&MakeNodeTask::execute, right_task));
       return VectorNodePtr(node.release());
@@ -279,6 +323,19 @@ namespace mlcore
       }
     }
 
+    std::ostringstream oss;
+    oss << "terminal d = [";
+
+    for (auto v : d)
+    {
+      oss << v << ';';
+    }
+
+    static std::size_t consumed_size = 0;
+    consumed_size += region_indexes.size();
+    oss << "] " << region_indexes.size() << " (" << consumed_size << " from " << examples_.size() << ")" << std::endl;
+    std::cout << oss.str();
+
     return std::make_unique<TerminalNode<std::vector<double>>>(d);
   }
 
@@ -287,7 +344,6 @@ namespace mlcore
     Split& split,
     const std::deque<std::size_t>& region_indexes) const
   {
-    std::cout << "best_split: " << examples_.domains()->at(feature_num).get_feature().name << std::endl;
     const auto& domain = examples_.domains()->at(feature_num);
 
     if (domain.size() <= 1)
@@ -332,24 +388,31 @@ namespace mlcore
         val2.minus(vals[split_point]);
       }
 
-      Split s;
-      s.m1 = val1.get();
-      s.m2 = val2.get();
-      s.feature_num = feature_num;
-      s.split_point = split_point;
+      if (val1.n() >= 2 && val2.n() >= 2)
+      {
+        Split s;
+        s.m1 = val1.get();
+        s.m2 = val2.get();
+        s.feature_num = feature_num;
+        s.split_point = split_point;
 
-      if (domain.get_feature().type == mlcore::FeatureType::NotOrdered)
-      {
-        make_split(region_indexes, s, compare_unordered);
-      }
-      else
-      {
-        make_split(region_indexes, s, compare_ordered);
-      }
+        if (domain.get_feature().type == mlcore::FeatureType::NotOrdered)
+        {
+          make_split(region_indexes, s, compare_unordered);
+        }
+        else
+        {
+          make_split(region_indexes, s, compare_ordered);
+        }
 
-      if (s.has_split && s.err < split.err)
-      {
-        split = s;
+        if (s.has_split && s.err < split.err)
+        {
+          std::cout << domain.get_feature().name << " = " << examples_.mark_to_val(feature_num, split_point)
+            << " s.err = " << std::fixed << s.err << " split.err = " << std::fixed << split.err << std::endl;
+          std::cout << t_test_debug << std::endl;
+
+          split = s;
+        }
       }
     }
   }

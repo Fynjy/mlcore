@@ -306,6 +306,25 @@ namespace mlcore
     return points_.back();
   }
 
+  VectorDataPoint& VectorDataHistogram::addFrom(const VectorDataHistogram& examples, std::size_t i)
+  {
+    const auto src = examples[i];
+    push_back();
+    auto& trg = points_.back();
+
+    for (std::size_t i = 0; i < features_count(); ++i)
+    {
+      trg.x(i) = val_to_mark(i, examples.mark_to_val(i, src.x(i)));
+    }
+
+    for (std::size_t i = 0; i < points_count(); ++i)
+    {
+      trg.d(i) = src.d(i);
+    }
+
+    return points_.back();
+  }
+
   void VectorDataHistogram::trace_memory_stats(std::ostream& os)
   {
     const auto debug_info = memory_pool_.get_debug_info();
