@@ -31,12 +31,12 @@ namespace mlcore
 
   VectorNodePtr MultiClassLogisticClassification::make_node(const Context& ctx)
   {
-
+    return VectorNodePtr();
   }
 
   VectorNodePtr MultiClassLogisticClassification::make_terminal_node(const std::vector<double>& d, const std::deque<std::size_t>& region_indexes)
   {
-
+    return VectorNodePtr();
   }
 
   void MultiClassLogisticClassification::best_split(

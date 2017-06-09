@@ -1,45 +1,26 @@
-/*
- * DataRow.h
- *
- *  Created on: 2016-05-14
- *      Author: Anton Kochnev
- */
-
 #ifndef DATAROW_H_
 #define DATAROW_H_
 
-#include <iterator>
-
-#include "cppcore/string/StringView.h"
+#include <string>
+#include <vector>
 
 namespace mlcore
-{
-namespace data
 {
   class DataRow
   {
   public:
-    class Iterator
-    :
-      public std::iterator<std::input_iterator_tag, cppcore::StringView>
-    {
-    public:
-      Iterator& operator++ ();
-      Iterator operator++ (int);
-      const cppcore::StringView& operator* () const;
-      const cppcore::StringView* operator-> () const;
-    };
-
-  public:
-    DataRow(std::size_t num);
-    Iterator begin() const;
-    Iterator end() const;
+    DataRow();
+    DataRow(std::size_t num, std::vector<std::string>&& values);
     std::size_t num() const;
+    const std::vector<std::string>& values() const;
+    std::size_t size() const;
+    const std::string& get(std::size_t i) const;
+    void clear();
 
   private:
-    std::size_t num_;
+    std::size_t num_ = 0;
+    std::vector<std::string> values_;
   };
-}
 }
 
 #endif /* DATAROW_H_ */

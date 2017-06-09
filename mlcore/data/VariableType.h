@@ -1,18 +1,9 @@
-/*
- * VariableType.h
- *
- *  Created on: 2016-05-11
- *      Author: Anton Kochnev
- */
-
 #ifndef VARIABLETYPE_H_
 #define VARIABLETYPE_H_
 
 #include <string>
 
 namespace mlcore
-{
-namespace data
 {
   class VariableType
   {
@@ -35,7 +26,6 @@ namespace data
     virtual ~IntegerVariableType();
     virtual bool match(const std::string& str) const;
   };
-}
 }
 
 #endif /* VARIABLETYPE_H_ */

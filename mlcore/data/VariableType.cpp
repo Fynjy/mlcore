@@ -1,17 +1,8 @@
-/*
- * VariableType.cpp
- *
- *  Created on: 2016-05-11
- *      Author: Anton Kochnev
- */
-
 #include <cctype>
 
 #include "VariableType.h"
 
 namespace mlcore
-{
-namespace data
 {
   /*
    * VariableType
@@ -52,5 +43,4 @@ namespace data
 
     return true;
   }
-}
 }

@@ -1,10 +1,3 @@
-/*
- * VariableDomain.h
- *
- *  Created on: 2016-05-09
- *      Author: Anton Kochnev
- */
-
 #ifndef VARIABLEDOMAIN_H_
 #define VARIABLEDOMAIN_H_
 
@@ -13,18 +6,19 @@
 
 namespace mlcore
 {
-namespace data
-{
-  /**
-   * Represents values of the variable in the date.
-   */
   class VariableDomain
   {
   public:
-    std::size_t count() const;
-    void add(const std::string& str);
+    typedef std::map<std::string, std::size_t> Counts;
+
+  public:
+    std::size_t size() const;
+    void add(const std::string& str, std::size_t c = 1);
+    const Counts& counts() const;
+
+  private:
+    Counts counts_;
   };
-}
 }
 
 #endif /* VARIABLEDOMAIN_H_ */

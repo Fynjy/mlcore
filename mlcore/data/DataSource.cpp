@@ -1,34 +1,9 @@
-/*
- * DataSource.cpp
- *
- *  Created on: 2016-05-12
- *      Author: Anton Kochnev
- */
-
 #include <sstream>
 
 #include "DataSource.h"
 
 namespace mlcore
 {
-namespace data
-{
-  /*
-   * DataSource
-   */
-  DataSource::~DataSource()
-  {}
-
-  DataSource::Iterator DataSource::begin()
-  {
-    return Iterator(this);
-  }
-
-  DataSource::Iterator DataSource::end()
-  {
-    return Iterator(nullptr);
-  }
-
   /*
    * CSVDataSource
    */
@@ -48,22 +23,49 @@ namespace data
       oss << "Can't open file: '" << filename << "'";
       throw std::runtime_error(oss.str());
     }
-  }
 
-  std::vector<std::string> CSVDataSource::header()
-  {
-    std::vector<std::string> names;
-    std::string line;
-    std::getline(ifs_, line);
-    std::istringstream iss(line);
-    std::string name;
-
-    while (std::getline(iss, name, separator_))
+    if (has_header_flag_ && has_data_)
     {
-      names.push_back(name);
+      read_next();
+      header_ = current_.values();
+      current_ = DataRow();
     }
-
-    return names;
   }
-}
+
+  const std::vector<std::string>& CSVDataSource::header()
+  {
+    return header_;
+  }
+
+  bool CSVDataSource::has_next()
+  {
+    return has_data_;
+  }
+
+  const DataRow& CSVDataSource::next()
+  {
+    read_next();
+    return current_;
+  }
+
+  void CSVDataSource::read_next()
+  {
+    std::string line;
+    has_data_ = static_cast<bool>(std::getline(ifs_, line));
+    has_data_ &= !line.empty();
+
+    if (has_data_)
+    {
+      std::istringstream iss(line);
+      std::string val;
+      std::vector<std::string> vals;
+
+      while (std::getline(iss, val, separator_))
+      {
+        vals.push_back(val);
+      }
+
+      current_ = DataRow(current_.num() + 1, std::move(vals));
+    }
+  }
 }

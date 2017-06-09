@@ -1,15 +1,6 @@
-/*
- * Variable.cpp
- *
- *  Created on: 2016-05-11
- *      Author: Anton Kochnev
- */
-
 #include "Variable.h"
 
 namespace mlcore
-{
-namespace data
 {
   Variable::Variable(const std::string& name, std::size_t num)
   :
@@ -26,5 +17,4 @@ namespace data
   {
     return num_;
   }
-}
 }

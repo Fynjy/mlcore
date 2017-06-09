@@ -71,6 +71,33 @@
     <ClInclude Include="mlcore\classification\MultiClassLogisticClassification.h">
       <Filter>Header Files\classification</Filter>
     </ClInclude>
+    <ClInclude Include="RootMeanSquaredLogarithmicError.h">
+      <Filter>Header Files\regression</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\DataHistogram.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\DataRow.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\DataSource.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\DataAnalyser.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\Variable.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\VariableDomain.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\VariableType.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
+    <ClInclude Include="mlcore\data\FeatureMapper.h">
+      <Filter>Header Files\data</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mlcore\data\Features.cpp">
@@ -87,6 +114,33 @@
     </ClCompile>
     <ClCompile Include="mlcore\classification\MultiClassLogisticClassification.cpp">
       <Filter>Source Files\classification</Filter>
+    </ClCompile>
+    <ClCompile Include="RootMeanSquaredLogarithmicError.cpp">
+      <Filter>Source Files\regression</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\DataHistogram.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\DataAnalyser.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\DataRow.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\DataSource.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\Variable.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\VariableType.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\VariableDomain.cpp">
+      <Filter>Source Files\data</Filter>
+    </ClCompile>
+    <ClCompile Include="mlcore\data\FeatureMapper.cpp">
+      <Filter>Source Files\data</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

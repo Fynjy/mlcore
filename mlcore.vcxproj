@@ -81,7 +81,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>../cppcore/;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)../cppcore/;$(ProjectDir)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -129,19 +129,37 @@
   <ItemGroup>
     <ClInclude Include="mlcore\classification\MultiClassLogisticClassification.h" />
     <ClInclude Include="mlcore\control\TreeControl.h" />
+    <ClInclude Include="mlcore\data\DataAnalyser.h" />
+    <ClInclude Include="mlcore\data\DataHistogram.h" />
+    <ClInclude Include="mlcore\data\DataRow.h" />
+    <ClInclude Include="mlcore\data\DataSource.h" />
+    <ClInclude Include="mlcore\data\FeatureMapper.h" />
     <ClInclude Include="mlcore\data\Features.h" />
+    <ClInclude Include="mlcore\data\Variable.h" />
+    <ClInclude Include="mlcore\data\VariableDomain.h" />
+    <ClInclude Include="mlcore\data\VariableType.h" />
     <ClInclude Include="mlcore\data\VectorDataHistogram.h" />
     <ClInclude Include="mlcore\statistic\DescriptiveStatistics.h" />
     <ClInclude Include="mlcore\tree\Filter.h" />
     <ClInclude Include="mlcore\tree\Node.h" />
     <ClInclude Include="mlcore\tree\Tree.h" />
+    <ClInclude Include="RootMeanSquaredLogarithmicError.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="mlcore\classification\MultiClassLogisticClassification.cpp" />
     <ClCompile Include="mlcore\control\TreeControl.cpp" />
+    <ClCompile Include="mlcore\data\DataAnalyser.cpp" />
+    <ClCompile Include="mlcore\data\DataHistogram.cpp" />
+    <ClCompile Include="mlcore\data\DataRow.cpp" />
+    <ClCompile Include="mlcore\data\DataSource.cpp" />
+    <ClCompile Include="mlcore\data\FeatureMapper.cpp" />
     <ClCompile Include="mlcore\data\Features.cpp" />
+    <ClCompile Include="mlcore\data\Variable.cpp" />
+    <ClCompile Include="mlcore\data\VariableDomain.cpp" />
+    <ClCompile Include="mlcore\data\VariableType.cpp" />
     <ClCompile Include="mlcore\data\VectorDataHistogram.cpp" />
     <ClCompile Include="mlcore\tree\Filter.cpp" />
+    <ClCompile Include="RootMeanSquaredLogarithmicError.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

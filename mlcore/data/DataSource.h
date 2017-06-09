@@ -1,15 +1,7 @@
-/*
- * DataSource.h
- *
- *  Created on: 2016-05-12
- *      Author: Anton Kochnev
- */
-
 #ifndef DATASOURCE_H_
 #define DATASOURCE_H_
 
 #include <fstream>
-#include <iterator>
 #include <string>
 #include <vector>
 
@@ -19,38 +11,15 @@
 
 namespace mlcore
 {
-namespace data
-{
   class DataSource
   {
   public:
-    class Iterator
-    :
-      public std::iterator<std::input_iterator_tag, DataRow>
-    {
-      friend class DataSource;
+    virtual ~DataSource()
+    {}
 
-    public:
-      Iterator& operator++ ();
-      Iterator operator++ (int);
-      const DataRow& operator* () const;
-      const DataRow* operator-> () const;
-
-    private:
-      DataSource* source_;
-
-    protected:
-      Iterator(DataSource* source);
-    };
-
-  public:
-    virtual ~DataSource();
-    virtual std::vector<std::string> header() = 0;
+    virtual const std::vector<std::string>& header() = 0;
     virtual bool has_next() = 0;
-    virtual DataRow next() = 0;
-
-    Iterator begin();
-    Iterator end();
+    virtual const DataRow& next() = 0;
   };
 
   class CSVDataSource
@@ -61,13 +30,22 @@ namespace data
     CSVDataSource();
     virtual ~CSVDataSource();
     void open(const std::string& filename);
-    virtual std::vector<std::string> header();
+    virtual const std::vector<std::string>& header() override;
+    virtual bool has_next() override;
+    virtual const DataRow& next() override;
 
   private:
     std::ifstream ifs_;
+    bool has_data_ = true;
+    std::vector<std::string> header_;
+    DataRow current_;
+
     char separator_ = ',';
+    bool has_header_flag_ = true;
+
+  private:
+    void read_next();
   };
-}
 }
 
 #endif /* DATASOURCE_H_ */
